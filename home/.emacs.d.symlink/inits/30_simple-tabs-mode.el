@@ -1,0 +1,10 @@
+(defun simple-tabs-mode ()
+  "Bind TAB to simple tabs, instead of whatever indent function is active."
+  (interactive)
+  (if (local-variable-if-set-p 'my-prev-indent-line-function)
+      (progn (setq-local indent-line-function my-prev-indent-line-function)
+             (setq-local my-prev-indent-line-function nil)
+             (message "Simple tabs mode is off"))
+    (setq-local my-prev-indent-line-function indent-line-function)
+    (setq-local indent-line-function 'insert-tab)
+    (message "Simple tabs mode is on")))

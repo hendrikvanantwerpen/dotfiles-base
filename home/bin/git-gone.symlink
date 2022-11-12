@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+
+set -eu
+
+git remote | while read -r remote; do
+  echo "Fetching remote branches"
+  git fetch "$remote"
+  echo "Pruning remote branches"
+  git remote prune "$remote"
+done
+echo "Gone local branches:"
+git branch -v | grep '\[gone\]'

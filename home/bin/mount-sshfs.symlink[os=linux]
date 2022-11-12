@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if [ ! $# -eq 2 ]; then
+    echo "Usage: $0 REMOTE LOCAL" 1>&2
+    echo 1>&2
+    echo "  REMOTE := (USER '@')? HOST (':' PATH)?" 1>&2
+    echo "  LOCAL  := PATH" 1>&2
+    exit 1
+fi
+
+remote="$1"
+local="$2"
+
+## sshfs requires a colon, so we append :/ if missing
+if ! printf '%s' "$remote" | grep ':' >/dev/null 2>&1; then
+    remote="$remote:/"
+fi
+
+if [ ! -d "$local" ]; then
+    echo "Error: local mount point $local missing or not a directory" 1>&2
+    exit 1
+fi
+
+sshfs -o idmap=user,uid=$(id -u),gid=$(id -g) "$remote" "$local"

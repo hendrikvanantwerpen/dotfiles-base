@@ -1,0 +1,10 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! command -v gpg-connect-agent >&/dev/null; then
+    echo "Missing required command 'gpg-connect-agent'" 1>&2
+    exit 1
+fi
+
+gpg-connect-agent "scd serialno" "learn --force" /bye

@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! uname -o | grep 'Darwin' >&/dev/null; then
+    echo "Error: Only supports macOS"
+    exit 1
+fi
+
+if [ $# -ne 1 ]; then
+    echo "Usage: $0 VM-NAME" 1>&2
+    exit 1
+fi
+
+VBoxManage controlvm "$1" keyboardputstring "`pbpaste`"

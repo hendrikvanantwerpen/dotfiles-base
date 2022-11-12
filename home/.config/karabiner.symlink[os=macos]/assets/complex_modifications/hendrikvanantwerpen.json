@@ -1,0 +1,31 @@
+{
+    "title": "@hendrikvanantwerpen's modifications",
+    "rules": [{
+        "description": "Swap Cmd+Space to Ctrl+Space (Spotlight)",
+        "manipulators": [{
+            "from": {
+                "key_code": "spacebar",
+                "modifiers": {
+                    "mandatory": [ "left_command" ]
+                }
+            },
+            "to": {
+                "key_code": "spacebar",
+                "modifiers": [ "left_control" ]
+            },
+            "type": "basic"
+        }, {
+            "from": {
+                "key_code": "spacebar",
+                "modifiers": {
+                    "mandatory": [ "left_control" ]
+                }
+            },
+            "to": {
+                "key_code": "spacebar",
+                "modifiers": [ "left_command" ]
+            },
+            "type": "basic"
+        }]
+    }]
+}

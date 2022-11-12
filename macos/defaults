@@ -1,0 +1,65 @@
+## macOS defaults
+##
+## Reference at: https://macos-defaults.com/
+
+if [ -z ${DF_MOD_DIR+x} ] || [ ! -d "$DF_MOD_DIR" ]; then
+    echo "Required environment variable DF_MOD_DIR is empty. Sourced from outside a dotfiles script?" 1>&2
+    exit 1
+fi
+
+## Dock
+$df_run defaults write com.apple.dock "orientation" -string "bottom"
+$df_run defaults write com.apple.dock "autohide"    -bool "true"
+$df_run defaults write com.apple.dock "static-only" -bool "true" # only active apps
+
+## Finder
+$df_run defaults write NSGlobalDomain   "AppleShowAllExtensions"            -bool "true"
+$df_run defaults write com.apple.finder "AppleShowAllFiles"                 -bool "true"
+$df_run defaults write com.apple.finder "ShowPathbar"                       -bool "true"
+$df_run defaults write com.apple.finder "FXPreferredViewStyle"              -string "clmv" # clmv = column view, Nlsv = list view, glyv = gallery view, icnv = icon view
+$df_run defaults write com.apple.finder "_FXSortFoldersFirst"               -bool "true"
+$df_run defaults write com.apple.finder "FXDefaultSearchScope"              -string "SCcf" # SCcf = current directory, SCsp = previous seach scope, SCev = whole system
+$df_run defaults write NSGlobalDomain   "NSDocumentSaveNewDocumentsToCloud" -bool "false"
+$df_run defaults write com.apple.finder "_FXSortFoldersFirstOnDesktop"      -bool "true"
+$df_run defaults write com.apple.finder "CreateDesktop"                     -bool "false" # hide all icons
+$df_run defaults write com.apple.finder "ShowHardDrivesOnDesktop"           -bool "false"
+$df_run defaults write com.apple.finder "ShowExternalHardDrivesOnDesktop"   -bool "false"
+$df_run defaults write com.apple.finder "ShowRemovableMediaOnDesktop"       -bool "false"
+$df_run defaults write com.apple.finder "ShowMountedServersOnDesktop"       -bool "false"
+
+## Menubar
+$df_run defaults write com.apple.menuextra.clock "FlashDateSeparators" -bool "false"
+$df_run defaults write com.apple.menuextra.clock "DateFormat" -string "\"EEE d MMM HH:mm:ss\""
+
+## Mission Control
+$df_run defaults write com.apple.dock "mru-spaces" -bool "false" # do not reorganize spaces
+
+## Keyboard
+$df_run defaults write NSGlobalDomain "ApplePressAndHoldEnabled" -bool "false"
+
+## iTerm2
+$df_run defaults write com.googlecode.iterm2 "LoadPrefsFromCustomFolder" -bool true
+$df_run defaults write com.googlecode.iterm2 "PrefsCustomFolder" -string "$DF_MOD_DIR/macos/iterm2.prefs"
+$df_run defaults write com.googlecode.iterm2 "NoSyncNeverRemindPrefsChangesLostForFile_selection" -int 2 # 1: manually, 2: automatically
+
+## Reload processes
+$df_run killall Dock
+$df_run killall Finder
+$df_run killall SystemUIServer
+
+## Default browser
+if df_with_commands defaultbrowser; then
+    $df_run defaultbrowser firefox
+fi
+
+## Login items
+$df_run df_macos_ensure_login_item /Applications/Amethyst.app
+$df_run df_macos_ensure_login_item /Applications/Caffeine.app
+$df_run df_macos_ensure_login_item /Applications/Evernote.app
+$df_run df_macos_ensure_login_item /Applications/Karabiner-Elements.app
+$df_run df_macos_ensure_login_item /Applications/Signal.app
+$df_run df_macos_ensure_login_item /Applications/Spotify.app
+$df_run df_macos_ensure_login_item /Applications/Todoist.app
+$df_run df_macos_ensure_login_item /Applications/WhatsApp.app
+$df_run df_macos_ensure_login_item /System/Applications/Calendar.app
+$df_run df_macos_ensure_login_item /System/Applications/Mail.app

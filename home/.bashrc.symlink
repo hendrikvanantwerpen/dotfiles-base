@@ -1,0 +1,77 @@
+# .bashrc - Non-interactive definitions \ assumes .profile has been sourced in the environment
+
+# Source global definitions
+source_if_exists /etc/bashrc
+
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix; then
+   source_if_exists /etc/bash_completion
+fi
+
+# Git aware prompt
+export GITAWAREPROMPT="$HOME/.bash/git-aware-prompt"
+if ! test -d "$GITAWAREPROMPT"; then
+  echo "Warning: Missing $GITAWAREPROMPT"
+else
+  source_if_exists "$GITAWAREPROMPT/main.sh"
+fi
+
+# Set prompt
+# shellcheck disable=SC2154
+export PS1="\u@\h:\w\[$txtcyn\]\$git_branch\[$txtylw\]\$git_dirty\[$txtrst\]\$ "
+# shellcheck disable=SC2154
+export SUDO_PS1="\[$bakred\]\u@\h\[$txtrst\]:\w\$ "
+
+# Dir handling
+function cd {
+    if (($# > 0)); then
+        pushd "$@" >/dev/null || return
+    else
+        cd "$HOME" || return
+    fi
+}
+alias dirs='dirs -v'
+
+# emacs deamon control function
+function emacsd {
+    if (($# > 0)); then
+        case "$1" in
+            "--help")
+                echo "Usage: emacsd COMMAND"
+                echo "  --start/--daemon   Start Emacs daemon"
+                echo "  --kill/--quit      Quit Emacs daemon"
+                echo "  --help             Show this help"
+                ;;
+            "--start"|"--daemon")
+                emacs --daemon
+                ;;
+            "--kill"|"--quit")
+                emacsclient -e '(kill-emacs)'
+                ;;
+            *)
+                echo "Unknown Emacs command: $1"
+                ;;
+        esac
+    else
+        emacs --daemon
+    fi
+}
+
+# Common aliases
+alias rm='rm -i'
+alias cp='cp -i'
+alias mv='mv -i'
+
+alias l.='ls -d .* --color=tty'
+alias ll='ls -l --color=tty'
+alias ls='ls --color=tty'
+
+alias timestamp='date +%Y%m%dT%H%M%S'
+
+# Source OS specific definitions
+source_if_exists "$HOME/.bashrc.os"
+
+# Source host specific definitions
+source_if_exists "$HOME/.bashrc.host"

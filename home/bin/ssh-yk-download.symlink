@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if [ "$(uname -o)" = "Darwin" ]; then
+    echo "It is recommended to use ssh-yk-add instead" 1>&2
+    exit 1
+fi
+
+if ! command -v ykman >&/dev/null; then
+    echo "Missing required command 'ykman'" 1>&2
+    exit 1
+fi
+if ! command -v ssh-keygen >&/dev/null; then
+    echo "Missing required command 'ssh-keygen'" 1>&2
+    exit 1
+fi
+
+echo "Checking for yubikey"
+number_of_keys=$(ykman list --serials | wc -l)
+if [ $number_of_keys -ne 1 ]; then
+    echo "Expected exactly one YubiKey, found $number_of_keys" 1>&2
+    exit 1
+fi
+key_id=$(ykman list --serials)
+
+echo "Checking for pre-existing key file"
+key_file="$HOME/.ssh/id_yk${key_id}"
+if [ -e "$key_file" ]; then
+    echo "Key file '$key_file' already exists" 1>&2
+    exit 1
+fi
+
+echo "Downloading resident ssh credential"
+ssh-keygen -K
+
+echo "Installing resident ssh credential as $key_file"
+mv id_ed25519_sk_rk "$key_file"
+chmod 0600 "$key_file"
+mv id_ed25519_sk_rk.pub "$key_file.pub"
+chmod 0600 "$key_file.pub"
+
+echo "You may need to add the following line to ~/.ssh/config in order to use the key:"
+echo "IdentityFile $key_file"

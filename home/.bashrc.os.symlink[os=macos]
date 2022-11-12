@@ -1,0 +1,6 @@
+## .bashrc.macos
+
+export BASH_SILENCE_DEPRECATION_WARNING=1
+
+alias bsdbash="env -i /bin/bash --noprofile --norc"
+alias doppio="caffeinate -disu"

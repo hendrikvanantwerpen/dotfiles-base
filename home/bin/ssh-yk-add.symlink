@@ -1,0 +1,28 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if [ "$(uname -o)" = "Darwin" ]; then
+    echo "Cannot add YubiKey credentials on macOS" 1>&2
+    exit 1
+fi
+
+if ! command -v ykman >&/dev/null; then
+    echo "Missing required command 'ykman'" 1>&2
+    exit 1
+fi
+if ! command -v ssh-add >&/dev/null; then
+    echo "Missing required command 'ssh-keygen'" 1>&2
+    exit 1
+fi
+
+echo "Checking for YubiKey"
+number_of_keys=$(ykman list --serials | wc -l)
+if [ $number_of_keys -ne 1 ]; then
+    echo "Expected exactly one YubiKey, found $number_of_keys" 1>&2
+    exit 1
+fi
+key_id=$(ykman list --serials)
+
+echo "Adding resident ssh credential"
+ssh-add -K

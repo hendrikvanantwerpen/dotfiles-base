@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+
+set -eu
+
+gh api repos/$1 | jq .id

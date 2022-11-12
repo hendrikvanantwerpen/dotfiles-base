@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+
+if [ -z ${DF_MOD_DIR+x} ] || [ ! -d "$DF_MOD_DIR" ]; then
+    echo "Required environment variable DF_MOD_DIR is empty. Sourced from outside a dotfiles script?" 1>&2
+    exit 1
+fi
+
+if df_on_macos; then
+    local_ssh_agent="com.openssh.ssh-agent-local"
+    if df_macos_service_status "$local_ssh_agent"; then
+        echo "Local SSH agent already enabled."
+        echo "Restart manually using:"
+        echo "    dotfiles services restart $local_ssh_agent"
+    else
+        $df_run df_macos_service_enable "$local_ssh_agent"
+        echo "Local SSH agent enabled. Update current shell environment using:"
+        echo "    source ~/.ssh-agent-local"
+    fi
+fi

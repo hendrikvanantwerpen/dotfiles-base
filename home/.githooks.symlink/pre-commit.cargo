@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+git update-index
+
+if [ -z "$(git diff-index --cached HEAD)" ]; then
+    echo "pre-commit WARNING No files staged for commit"
+fi
+
+## Check git markers
+# doesn't run outside a Git tree, so not run on $stage
+if ! git diff-index --check HEAD; then
+    echo "pre-commit ERROR Whitespace or conflict marker error: fix"
+    exit 1
+fi
+
+## Stage changes
+stage="$(mktemp -d)"
+# add final / to prefix because git does not
+git checkout-index --prefix="$stage/" -a
+
+## Check Rust formatting
+if ! (cd "$stage" && cargo fmt -- --check >/dev/null 2>&1); then
+    echo "pre-commit ERROR Formatting error: run 'cargo fmt' before committing"
+    exit 1
+fi
+
+## Check Rust test (which should imply compilation)
+if ! (cd "$stage" && cargo test --all --all-features); then
+    echo "pre-commit ERROR Compilation error: fix before committing"
+    exit 1
+fi
+
+## Close curtain
+rm -rf "$stage"
+
+exit 0

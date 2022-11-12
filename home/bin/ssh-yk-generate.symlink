@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if ! command -v ykman >&/dev/null; then
+    echo "Missing required command 'ykman'" 1>&2
+    exit 1
+fi
+if ! command -v ssh-keygen >&/dev/null; then
+    echo "Missing required command 'ssh-keygen'" 1>&2
+    exit 1
+fi
+
+echo "Checking for yubikey"
+number_of_keys=$(ykman list --serials | wc -l)
+if [ $number_of_keys -ne 1 ]; then
+    echo "Expected exactly one YubiKey, found $number_of_keys" 1>&2
+    exit 1
+fi
+key_id=$(ykman list --serials)
+
+echo "Checking for pre-existing ssh credentials"
+if ykman fido credentials list | grep '^ssh:' >&/dev/null; then
+    echo "Key already has ssh credentials" 1>&2
+    echo "If you want to regenerate, remove first using 'ykman fido credentials delete \"ssh:\"'" 1>&2
+    exit 1
+fi
+
+echo "Checking for pre-existing key file"
+key_file="$HOME/.ssh/id_yk${key_id}"
+if [ -e "$key_file" ]; then
+    echo "Key file '$key_file' already exists" 1>&2
+    exit 1
+fi
+
+echo "Generating resident ssh credential"
+ssh-keygen \
+    -t ed25519-sk \
+    -O resident \
+    -C "YubiKey $key_id" \
+    -f "$key_file"
+
+echo "Installing resident ssh credential as $key_file"
+chmod 0600 "$key_file.pub"
+
+echo "You may need to run ssh-yk-add, or add the following line to ~/.ssh/config in order to use the key:"
+echo "IdentityFile $key_file"

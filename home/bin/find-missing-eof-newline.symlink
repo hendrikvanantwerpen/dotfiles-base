@@ -1,0 +1,9 @@
+#!/usr/bin/env bash
+
+set -eu
+
+find "$@" -type f -print0 | while IFS= read -r -d '' file; do
+    if diff /dev/null "$file" | tail -1 | grep '^\\ No newline' > /dev/null; then
+        echo $file
+    fi
+done

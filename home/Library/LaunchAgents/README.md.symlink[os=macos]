@@ -1,0 +1,23 @@
+Getting this stuff to start is crap. This is what seems to work on Big Sur.
+
+Check basic syntax with:
+
+    plutil ~/Library/LaunchAgents/SERVICE.plist
+
+Load a service with:
+
+    launchctl load ~/Library/LaunchAgents/SERVICE.plist
+
+Note that loading again results in an obscure I/O error. Unloading and loading again should work.
+
+Enable the service with:
+
+    launchctl enable gui/(id -u)/SERVICE
+
+Kickstart the service with:
+
+    launchctl kickstart gui/(id -u)/SERVICE
+
+If it doesn't work, try looking at the barely existing logs:
+
+    tail /var/log/system.log

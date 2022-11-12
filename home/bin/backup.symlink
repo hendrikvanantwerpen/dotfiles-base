@@ -1,0 +1,105 @@
+#!/bin/bash
+
+set -eu
+
+HOSTNAME="$(hostname -s)"
+BACKUP_CONF="$HOME/.backup_conf"
+
+## Load config
+
+if [ ! -f "$BACKUP_CONF" ]; then
+    echo "ERROR: Cannot find configuration '$BACKUP_CONF'"
+    exit 1
+fi
+
+BACKUP_OPTS=()
+BACKUP_DIRS=()
+. "$BACKUP_CONF"
+
+## Check options
+
+if ${BACKUP_REPO+false}; then
+    echo "ERROR: BACKUP_REPO not set in '$BACKUP_CONF'"
+    exit 1
+fi
+if [ ! -e "$BACKUP_REPO"  ]; then
+    echo "ERROR: BACKUP_REPO '$BACKUP_REPO' does not exist"
+    exit 1
+fi
+if [ ! -d "$BACKUP_REPO"  ]; then
+    echo "ERROR: BACKUP_REPO '$BACKUP_REPO' is not a directory"
+    exit 1
+fi
+
+if [ ${#BACKUP_DIRS[@]} -eq 0 ]; then
+    echo "ERROR: BACKUP_DIRS is empty"
+    exit 1
+fi
+
+BACKUP_HOSTNAME=ch-s010.rsync.net
+
+## Do backup
+
+function help {
+    echo "$0 COMMAND"
+    echo "Commands:"
+    echo "   check     Check backups in repo $BACKUP_REPO"
+    echo "   create    Create a new backup in repo $BACKUP_REPO"
+    echo "   list      List backups in repo $BACKUP_REPO"
+    echo "   sync      Sync repo $BACKUP_REPO to $BACKUP_HOSTNAME"
+    echo "   help      Show this help"
+}
+function error {
+    echo "$1" >&2
+    help
+    exit 1
+}
+
+if [ $# -lt 1 ]; then
+    error "Missing command"
+fi
+
+CMD=$1
+shift 1
+case "$CMD" in
+    check)
+        borg check \
+            "$BACKUP_REPO"
+        ;;
+    create)
+        BACKUP_NAME="$HOSTNAME-$(date +%Y%m%dT%H%M%S)"
+        BACKUP_TARGET="$BACKUP_REPO::$BACKUP_NAME"
+        borg create \
+            --progress \
+            --stats \
+            --compression lz4 \
+            --chunker-params 19,23,21,4095 \
+            --one-file-system \
+            --keep-exclude-tags \
+            --exclude-caches \
+            --exclude-if-present '@NOBACKUP.TAG' \
+            "${BACKUP_OPTS[@]}" \
+            "$BACKUP_TARGET" \
+            "${BACKUP_DIRS[@]}"
+        ;;
+    list)
+        borg list \
+            "$BACKUP_REPO"
+        ;;
+    sync)
+        rsync \
+            --info=progress2 \
+            --archive \
+            --delete \
+            "$BACKUP_REPO/." \
+            "$BACKUP_HOSTNAME:$HOSTNAME/."
+        ;;
+    help)
+        help
+        ;;
+    *)
+        echo "Unknown commnad '$CMD'"
+        help
+        ;;
+esac
+

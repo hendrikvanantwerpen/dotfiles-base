@@ -1,0 +1,55 @@
+# .profile - Interactive login shell
+
+. "$HOME/.sh_functions"
+
+# add various bin folders to PATH
+if [ -d "/usr/local/sbin" ] ; then
+    export PATH="/usr/local/sbin:$PATH"
+fi
+if [ -d "$HOME/.local/bin" ] ; then
+    export PATH="$HOME/.local/bin:$PATH"
+fi
+if [ -d "$HOME/bin" ] ; then
+    export PATH="$HOME/bin:$PATH"
+fi
+
+# ensure xdg cache exists
+if [ -z "$XDG_CACHE_HOME" ]; then
+    XDG_CACHE_HOME="$(mktemp -d -t cache.XXXX)"
+    export XDG_CACHE_HOME
+fi
+
+# editor
+export EDITOR="vim"
+export VISUAL="$EDITOR"
+export GIT_EDITOR="$EDITOR"
+
+# gpg-agent
+export GPG_TTY=$(tty)
+
+# Prevent Java tools from stealing focus
+export JAVA_TOOL_OPTIONS="-Djava.awt.headless=true"
+
+# Give Maven more memory
+export MAVEN_OPTS="-Xss64m -Xms1G -Xmx3G"
+
+# OPAM configuration
+source_if_exists "$HOME/.opam/opam-init/init.sh" >/dev/null 2>&1 || true
+
+# rustup configuration
+source_if_exists "$HOME/.cargo/env" >/dev/null 2>&1 || true
+
+# Source secrets
+source_if_exists "$HOME/.secrets"
+
+# Source OS specific definitions
+source_if_exists "$HOME/.profile.os"
+
+# Source user specific definitions
+source_if_exists "$HOME/.profile.user"
+
+# Source host specific definitions
+source_if_exists "$HOME/.profile.host"
+
+# Source .bashrc
+source_if_exists "$HOME/.bashrc"

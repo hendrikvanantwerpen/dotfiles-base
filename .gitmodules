@@ -1,0 +1,9 @@
+[submodule "home/.bash/git-aware-prompt.symlink"]
+	path = home/.bash/git-aware-prompt.symlink
+	url = https://github.com/jimeh/git-aware-prompt.git
+[submodule "home/.vim/bundle/vim-javascript.symlink"]
+	path = home/.vim/bundle/vim-javascript.symlink
+	url = https://github.com/pangloss/vim-javascript.git
+[submodule "home/.vim/bundle/vim-scala.symlink"]
+	path = home/.vim/bundle/vim-scala.symlink
+	url = https://github.com/derekwyatt/vim-scala.git

@@ -1,0 +1,11 @@
+*.swp
+*.swo
+\#*\#
+.\#*
+*~
+.DS_Store
+auto/
+*.orig
+.statix
+*.log
+*.pyc

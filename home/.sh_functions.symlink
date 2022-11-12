@@ -1,0 +1,16 @@
+# .sh_functions - Useful Shell functions
+
+source_if_exists()
+{
+    if [ -f "$1" ]; then
+	# shellcheck source=/dev/null
+        . "$1"
+    fi
+}
+
+exec_if_exists()
+{
+    if command -v "$1" >/dev/null 2>&1; then
+        "$@"
+    fi
+}

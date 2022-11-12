@@ -1,0 +1,5 @@
+(:name semver
+       :type github
+       :pkgname "hendrikvanantwerpen/semver.el"
+       :features (semver)
+       :depends (s))

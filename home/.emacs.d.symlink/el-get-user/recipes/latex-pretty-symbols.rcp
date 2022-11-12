@@ -1,0 +1,8 @@
+(:name latex-pretty-symbols
+       :type hg
+       :url "https://bitbucket.org/hendrikvanantwerpen/latex-pretty-symbols.el"
+       :features (latex-pretty-symbols)
+       :depends (cl-lib)
+       :after (progn
+                (add-hook 'TeX-mode-hook 'latex-pretty-symbols-mode)
+                (add-hook 'LaTeX-mode-hook 'latex-pretty-symbols-mode)))

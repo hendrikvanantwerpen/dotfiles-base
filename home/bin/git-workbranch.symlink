@@ -1,0 +1,63 @@
+#!/usr/bin/env bash
+
+set -eu
+
+log() {
+    echo "$@" 1>&2
+}
+
+fail() {
+    log "$@"
+    exit 1
+}
+
+usage() {
+    echo "Usage: git workbranch add|remove|help BRANCH_NAME"
+}
+
+if [ $# -ne 2 ]; then
+    fail "$(usage)"
+fi
+
+cmd="$1"
+branch_name="$2"
+
+current_dir="$(pwd)"
+worktree_dir="$(dirname "$current_dir")"
+worktree_name="$(basename "$current_dir")"
+worktree_base="$(printf "%s" "$worktree_name" | sed -e 's/\..*$//')"
+branch_dir="$worktree_dir/$worktree_base.$branch_name"
+
+case "$cmd" in
+    "add")
+        if [ -e "$branch_dir" ]; then
+            fail "Error: Branch directory $branch_dir already exists"
+        fi
+        if [ -z "$(git branch --list "$branch_name")" ]; then
+            git branch "$branch_name"
+        fi
+        git worktree add "$branch_dir" "$branch_name"
+        echo "Worktree added: ../$worktree_base.$branch_name"
+        exit 0
+        ;;
+    "remove")
+        if [ "$branch_dir" == "$current_dir" ]; then
+            fail "Error: Cannot remove current worktree"
+        fi
+        if [ -e "$branch_dir" ]; then
+            git worktree remove -f "$branch_dir"
+            echo "Worktree removed: ../$worktree_base.$branch_name"
+        fi
+        if [ ! -z "$(git branch --list "$branch_name")" ]; then
+            git branch -D "$branch_name"
+        fi
+        exit 0
+        ;;
+    "help")
+        echo "$(usage)"
+        exit 0
+        ;;
+    *)
+        log "Error: Unexpected command '$cmd'"
+        fail "$(usage)"
+esac
