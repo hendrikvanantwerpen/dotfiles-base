@@ -15,7 +15,7 @@ df_macos_set_default com.apple.dock "static-only" -bool "true" # only active app
 ## Finder
 df_macos_set_default NSGlobalDomain   "AppleShowAllExtensions"            -bool "true"
 df_macos_set_default NSGlobalDomain   "NSDocumentSaveNewDocumentsToCloud" -bool "false"
-df_macos_set_default com.apple.finder "AppleShowAllFiles"                 -bool "true"
+df_macos_set_default com.apple.finder "AppleShowAllFiles"                 -bool "false"
 df_macos_set_default com.apple.finder "CreateDesktop"                     -bool "false" # hide all icons
 df_macos_set_default com.apple.finder "FXDefaultSearchScope"              -string "SCcf" # SCcf = current directory, SCsp = previous seach scope, SCev = whole system
 df_macos_set_default com.apple.finder "FXPreferredGroupBy"                -string "Name"
@@ -56,11 +56,4 @@ fi
 ## Login items
 df_macos_ensure_login_item /Applications/Amethyst.app
 df_macos_ensure_login_item /Applications/Caffeine.app
-df_macos_ensure_login_item /Applications/Evernote.app
 df_macos_ensure_login_item /Applications/Karabiner-Elements.app
-df_macos_ensure_login_item /Applications/Signal.app
-df_macos_ensure_login_item /Applications/Spotify.app
-df_macos_ensure_login_item /Applications/Todoist.app
-df_macos_ensure_login_item /Applications/WhatsApp.app
-df_macos_ensure_login_item /System/Applications/Calendar.app
-df_macos_ensure_login_item /System/Applications/Mail.app
