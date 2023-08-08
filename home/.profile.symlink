@@ -39,6 +39,26 @@ source_if_exists "$HOME/.opam/opam-init/init.sh" >/dev/null 2>&1 || true
 # rustup configuration
 source_if_exists "$HOME/.cargo/env" >/dev/null 2>&1 || true
 
+# NVM
+export NVM_DIR="$HOME/.nvm"
+source_if_exists "$NVMPATH/nvm.sh"
+
+# direnv
+if command -v direnv >/dev/null 2>&1; then
+  eval "$(direnv hook bash)"
+fi
+
+# Golang
+export GOPATH="$HOME/.go"
+export PATH="$GOPATH/bin:$PATH"
+
+# pyenv
+if command -v pyenv >/dev/null 2>&1; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
+fi
+
 # Source secrets
 source_if_exists "$HOME/.secrets"
 

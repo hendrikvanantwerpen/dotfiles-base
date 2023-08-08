@@ -2,10 +2,6 @@
 
 source_if_exists "$HOME/.ssh-agent-local" >/dev/null 2>&1
 
-if command -v direnv >/dev/null 2>&1; then
-  eval "$(direnv hook bash)"
-fi
-
 # Add Homebrew to PATH on M1
 if [ "$(uname -m)" = "arm64" ]; then
     export PATH="/opt/homebrew/bin:$PATH"
@@ -115,16 +111,17 @@ else
   . "$brew_env"
 fi
 
-export GOPATH="$HOME/.go"
-export PATH="$GOPATH/bin:$PATH"
+# NVM
+source_if_exists "/usr/local/opt/nvm/nvm.sh"
+source_if_exists "/usr/local/opt/nvm/etc/bash_completion.d/nvm"
 
-export NVM_DIR="$HOME/.nvm"
-source_if_exists "$NVMPATH/nvm.sh"
-
+# Node
 export NODE_PATH="/usr/local/lib/node_modules:$NODE_PATH"
 
+# Nix
 source_if_exists "$HOME/.nix-profile/etc/profile.d/nix.sh"
 
+# SDKMAN
 export SDKMAN_DIR="/usr/local/sdkman"
 if [ -d "$SDKMAN_DIR" ]; then
   source_if_exists "$SDKMAN_DIR/bin/sdkman-init.sh"
