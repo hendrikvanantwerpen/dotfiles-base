@@ -2,8 +2,9 @@
 
 git update-index
 
-if [ -z "$(git diff-index --cached HEAD)" ]; then
-    echo "pre-commit WARNING No files staged for commit"
+if [ -z "$(git diff-index --cached HEAD)" ] && [ -z "${GITHOOKS_ALLOW_EMPTY_COMMIT+x}" ]; then
+    echo "pre-commit ERROR No files staged for commit: set GITHOOKS_ALLOW_EMPTY_COMMIT to allow"
+    exit 1
 fi
 
 ## Check git markers
@@ -19,14 +20,18 @@ stage="$(mktemp -d)"
 git checkout-index --prefix="$stage/" -a
 
 ## Check Rust formatting
-if ! (cd "$stage" && cargo fmt -- --check >/dev/null 2>&1); then
-    echo "pre-commit ERROR Formatting error: run 'cargo fmt' before committing"
+if [ -z "${GITHOOKS_ALLOW_UNFORMATTED+x}" ] && ! (cd "$stage" && cargo fmt -- --check); then
+    echo "pre-commit ERROR Formatting error: run 'cargo fmt' before committing or set GITHOOKS_ALLOW_UNFORMATTED to allow"
     exit 1
 fi
 
-## Check Rust test (which should imply compilation)
-if ! (cd "$stage" && cargo test --all --all-features); then
-    echo "pre-commit ERROR Compilation error: fix before committing"
+if [ -z "${GITHOOKS_SKIP_CHECK+x}" ] && ! (cd "$stage" && cargo check --all-targets); then
+    echo "pre-commit ERROR Compilation error: fix before committing or set GITHOOKS_SKIP_CHECK to skip"
+    exit 1
+fi
+
+if [ -z "${GITHOOKS_SKIP_TEST+x}" ] && ! (cd "$stage" && cargo test --all); then
+    echo "pre-commit ERROR Test error: fix before committing or set GITHOOKS_SKIP_TEST to skip"
     exit 1
 fi
 
