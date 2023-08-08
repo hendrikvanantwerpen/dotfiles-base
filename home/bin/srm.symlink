@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+
+set -eu
+
+if [ $# -lt 1 ]; then
+    echo "Securely shred and remove directories and files" 1>&2
+    echo "Usage: $0 PATH..." 1>&2
+    exit 1
+fi
+
+if ! command -v find >/dev/null 2>&1; then
+    echo "Missing required command: find" 1>&2
+    exit 1
+fi
+
+if ! command -v shred >/dev/null 2>&1; then
+    echo "Missing required command: shred" 1>&2
+    exit 1
+fi
+
+find "$@" -type f -exec shred --force '{}' \;
+rm -rf "$@"
