@@ -70,6 +70,18 @@ alias ls='ls --color=tty'
 
 alias timestamp='date +%Y%m%dT%H%M%S'
 
+alias gc+='git commit --amend'
+alias gc='git commit'
+alias gf='git fetch'
+alias gfo='git fetch origin'
+alias gg='git gone'
+alias gp='git pull'
+alias grbc='git rebase --continue'
+alias grbi='git rebase -i'
+alias gwb='git workbranch'
+alias gwba='git workbranch add'
+alias gwbr='git workbranch remove'
+
 # Source OS specific definitions
 source_if_exists "$HOME/.bashrc.os"
 
