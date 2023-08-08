@@ -1,4 +1,8 @@
 # .bash_profile - Interactive bash login shell
 
-. "$HOME/.profile"
+# All initialization happens in .bashrc. Figuring out a setup that works for all
+# environments is too tricky: macOS runs login shells every time, Codespaces do
+# not run login shells at all. Doing all initialization in .bashrc simplifies things
+# significantly.
+
 . "$HOME/.bashrc"
