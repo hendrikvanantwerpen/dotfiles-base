@@ -2,6 +2,16 @@
 
 . "$HOME/.sh_functions"
 
+# Source global definitions
+source_if_exists /etc/bashrc
+
+# enable programmable completion features (you don't need to enable
+# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
+# sources /etc/bash.bashrc).
+if ! shopt -oq posix; then
+   source_if_exists /etc/bash_completion
+fi
+
 # add various bin folders to PATH
 if [ -d "/usr/local/sbin" ] ; then
     export PATH="/usr/local/sbin:$PATH"
@@ -65,25 +75,6 @@ fi
 
 # Source secrets
 source_if_exists "$HOME/.secrets"
-
-# Source OS specific definitions
-source_if_exists "$HOME/.profile.os"
-
-# Source user specific definitions
-source_if_exists "$HOME/.profile.user"
-
-# Source host specific definitions
-source_if_exists "$HOME/.profile.host"
-
-# Source global definitions
-source_if_exists /etc/bashrc
-
-# enable programmable completion features (you don't need to enable
-# this, if it's already enabled in /etc/bash.bashrc and /etc/profile
-# sources /etc/bash.bashrc).
-if ! shopt -oq posix; then
-   source_if_exists /etc/bash_completion
-fi
 
 # Git aware prompt
 export GITAWAREPROMPT="$HOME/.bash/git-aware-prompt"
@@ -162,3 +153,6 @@ source_if_exists "$HOME/.bashrc.os"
 
 # Source host specific definitions
 source_if_exists "$HOME/.bashrc.host"
+
+# Source user specific definitions
+source_if_exists "$HOME/.bashrc.user"
