@@ -1,4 +1,5 @@
 [include]
+    path = .gitconfig.os
     path = .gitconfig.user
 
 [alias]
@@ -12,12 +13,6 @@
 
 [core]
 	excludesfile = ~/.gitignore_global
-
-[credential]
-	helper = # reset any pre-existing helpers
-	helper = /usr/local/share/gcm-core/git-credential-manager
-[credential "https://dev.azure.com"]
-	useHttpPath = true
 
 [diff]
     tool = kdiff3

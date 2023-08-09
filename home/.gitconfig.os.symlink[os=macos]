@@ -1,0 +1,3 @@
+[credential]
+	helper = # reset any pre-existing helpers
+	helper = /usr/local/share/gcm-core/git-credential-manager
