@@ -20,9 +20,13 @@ if [ -z "$XDG_CACHE_HOME" ]; then
 fi
 
 # editor
-export EDITOR="vim"
-export VISUAL="$EDITOR"
-export GIT_EDITOR="$EDITOR"
+if [ "${CODESPACES-false}" == "true" ]; then
+    # assume default
+else
+    export EDITOR="vim"
+    export VISUAL="$EDITOR"
+    export GIT_EDITOR="$EDITOR"
+fi
 
 # gpg-agent
 export GPG_TTY=$(tty)
