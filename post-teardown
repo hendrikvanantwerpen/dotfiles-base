@@ -5,11 +5,13 @@ if [ -z ${DF_MOD_DIR+x} ] || [ ! -d "$DF_MOD_DIR" ]; then
     exit 1
 fi
 
-if df_on_macos; then
+case "$df_os" in
+"macos")
     local_ssh_agent="com.openssh.ssh-agent-local"
     if df_macos_service_status "$local_ssh_agent"; then
         echo "Local SSH agent kept enabled, to prevent SSH connectivity issues."
         echo "Disable manually using:"
         echo "    dotfiles services disable $local_ssh_agent"
     fi
-fi
+    ;;
+esac

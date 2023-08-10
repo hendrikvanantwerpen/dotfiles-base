@@ -5,7 +5,8 @@ if [ -z ${DF_MOD_DIR+x} ] || [ ! -d "$DF_MOD_DIR" ]; then
     exit 1
 fi
 
-if df_on_macos; then
+case "$df_os" on
+"macos")
     local_ssh_agent="com.openssh.ssh-agent-local"
     if df_macos_service_status "$local_ssh_agent"; then
         echo "Local SSH agent already enabled."
@@ -16,4 +17,5 @@ if df_on_macos; then
         echo "Local SSH agent enabled. Update current shell environment using:"
         echo "    source ~/.ssh-agent-local"
     fi
-fi
+    ;;
+esac
