@@ -5,7 +5,7 @@ if [ -z ${DF_MOD_DIR+x} ] || [ ! -d "$DF_MOD_DIR" ]; then
     exit 1
 fi
 
-case "$df_os" on
+case "$df_os" in
 "macos")
     local_ssh_agent="com.openssh.ssh-agent-local"
     if df_macos_service_status "$local_ssh_agent"; then
