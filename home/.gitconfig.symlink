@@ -1,5 +1,6 @@
 [include]
     path = .gitconfig.os
+    path = .gitconfig.host
     path = .gitconfig.user
 
 [alias]
