@@ -24,9 +24,9 @@ fi
 cmd="$1"
 shift 1
 
-current_dir="$(pwd)"
-worktree_dir="$(dirname "$current_dir")"
-worktree_name="$(basename "$current_dir")"
+worktree_dir="$(git rev-parse --show-toplevel)"
+worktree_parent="$(dirname "$worktree_dir")"
+worktree_name="$(basename "$worktree_dir")"
 worktree_base="$(printf "%s" "$worktree_name" | sed -e 's/\..*$//')"
 
 case "$cmd" in
@@ -39,7 +39,7 @@ case "$cmd" in
         fi
         branch_name="$1"
         shift 1
-        branch_dir="$worktree_dir/$worktree_base.$branch_name"
+        branch_dir="$worktree_parent/$worktree_base.$branch_name"
         if [ -e "$branch_dir" ]; then
             fail "Error: Branch directory $branch_dir already exists"
         fi
@@ -67,7 +67,7 @@ case "$cmd" in
                 git branch "$branch_name"
             fi
         fi
-        echo "Creating worktree: ../$worktree_base.$branch_name"
+        echo "Creating worktree: $worktree_parent/$worktree_base.$branch_name"
         git worktree add "$branch_dir" "$branch_name"
         echo "Updating submodules"
         git -C "$branch_dir" submodule update --init --recursive
@@ -77,8 +77,8 @@ case "$cmd" in
             fail "$(usage)"
         fi
         for branch_name in "$@"; do
-            branch_dir="$worktree_dir/$worktree_base.$branch_name"
-            if [ "$branch_dir" == "$current_dir" ]; then
+            branch_dir="$worktree_parent/$worktree_base.$branch_name"
+            if [ "$branch_dir" == "$worktree_dir" ]; then
                 fail "Error: Cannot remove current worktree"
             fi
             if [ -e "$branch_dir" ]; then

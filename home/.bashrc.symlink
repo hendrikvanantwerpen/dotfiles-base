@@ -146,6 +146,7 @@ alias grbc='git rebase --continue'
 alias grbi='git rebase -i'
 alias gwb='git workbranch'
 alias gwba='git workbranch add'
+alias gwbl='git workbranch list'
 alias gwbr='git workbranch remove'
 
 # Source OS specific definitions
