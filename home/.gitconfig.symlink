@@ -27,6 +27,9 @@
 [init]
 	defaultBranch = main
 
+[lfs.ssh]
+    automultiplex = false # interferes with ControlMaster settings in ssh_config
+
 [merge]
 	defaultToUpstream = true
 
