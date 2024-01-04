@@ -21,21 +21,21 @@ stage="$(mktemp -d)"
 # add final / to prefix because git does not
 git checkout-index --prefix="$stage/" -a
 
-## Check Rust formatting
-if [ -z "${GITHOOKS_ALLOW_UNFORMATTED+x}" ] && ! (cd "$stage" && cargo fmt -- --check); then
-    echo "pre-commit ERROR Formatting error: run 'cargo fmt' before committing or set GITHOOKS_ALLOW_UNFORMATTED to allow"
+git_dir="$(git rev-parse --path-format=absolute --git-common-dir)"
+make_targets="$git_dir/hooks/pre-commit.targets"
+if ! [ -f "$make_targets" ]; then
+    echo "pre-commit ERROR Missing make targets in $make_targets: add"
     exit 1
 fi
 
-if [ -z "${GITHOOKS_SKIP_CHECK+x}" ] && ! (cd "$stage" && cargo check --all); then
-    echo "pre-commit ERROR Compilation error: fix before committing or set GITHOOKS_SKIP_CHECK to skip"
-    exit 1
-fi
-
-if [ -z "${GITHOOKS_SKIP_TEST+x}" ] && ! (cd "$stage" && cargo test --all); then
-    echo "pre-commit ERROR Test error: fix before committing or set GITHOOKS_SKIP_TEST to skip"
-    exit 1
-fi
+## Run targets
+while IFS= read -r target; do
+    skip_var="GITHOOKS_SKIP_$target"
+    if [ -z "${!skip_var+x}" ] && ! (cd "$stage" && make "$target"); then
+        echo "pre-commit ERROR Compilation error: fix before committing or set GITHOOKS_SKIP_$target to skip"
+        exit 1
+    fi
+done < "$make_targets"
 
 ## Close curtain
 rm -rf "$stage"
