@@ -29,6 +29,31 @@ worktree_parent="$(dirname "$worktree_dir")"
 worktree_name="$(basename "$worktree_dir")"
 worktree_base="$(printf "%s" "$worktree_name" | sed -e 's/\..*$//')"
 
+github_login=
+if try_github_login="$(gh api user -q '.login')"; then
+    github_login="$try_github_login"
+else
+    log "Warning: cannot determine GitHub login. Try running 'gh auth login'."
+fi
+
+expand_branch_name() {
+    branch_name="$1"
+    if [ -n "$github_login" ]; then
+        branch_name="${branch_name/#@me/$github_login}"
+    fi
+    printf '%s' "$branch_name"
+}
+
+make_branch_dir() {
+    branch_name="$1"
+    if [ -n "$github_login" ]; then
+        branch_name="${branch_name#$github_login/}"
+    fi
+    branch_suffix="$(printf '%s' "$branch_name" | tr '/' '_')"
+    branch_dir="$worktree_parent/$worktree_base.$branch_suffix"
+    printf '%s' "$branch_dir"
+}
+
 case "$cmd" in
     "list")
         git worktree list
@@ -37,9 +62,9 @@ case "$cmd" in
         if [ $# -lt 1 ]; then
             fail "$(usage)"
         fi
-        branch_name="$1"
+        branch_name="$(expand_branch_name "$1")"
         shift 1
-        branch_dir="$worktree_parent/$worktree_base.$branch_name"
+        branch_dir="$(make_branch_dir "$branch_name")"
         if [ -e "$branch_dir" ]; then
             fail "Error: Branch directory $branch_dir already exists"
         fi
@@ -67,7 +92,7 @@ case "$cmd" in
                 git branch "$branch_name"
             fi
         fi
-        echo "Creating worktree: $worktree_parent/$worktree_base.$branch_name"
+        echo "Creating worktree: $branch_dir"
         git worktree add "$branch_dir" "$branch_name"
         echo "Updating submodules"
         git -C "$branch_dir" submodule update --init --recursive
@@ -77,13 +102,14 @@ case "$cmd" in
             fail "$(usage)"
         fi
         for branch_name in "$@"; do
-            branch_dir="$worktree_parent/$worktree_base.$branch_name"
+            branch_name="$(expand_branch_name "$1")"
+            branch_dir="$(make_branch_dir "$branch_name")"
             if [ "$branch_dir" == "$worktree_dir" ]; then
                 fail "Error: Cannot remove current worktree"
             fi
             if [ -e "$branch_dir" ]; then
                 git worktree remove -f "$branch_dir"
-                echo "Worktree removed: ../$worktree_base.$branch_name"
+                echo "Worktree removed: $branch_dir"
             fi
             if [ -n "$(git branch --list "$branch_name")" ]; then
                 git branch -D "$branch_name"
