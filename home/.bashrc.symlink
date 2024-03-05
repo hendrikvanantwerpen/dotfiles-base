@@ -65,6 +65,10 @@ fi
 # Golang
 export GOPATH="$HOME/.go"
 export PATH="$GOPATH/bin:$PATH"
+# We set this explicitly to tell Go not to mess with our SSH connections and use ControlMaster
+# From the Go source: https://github.com/golang/go/blob/0f3becf62f3935846490e60e5005e1e4a55bec67/src/cmd/go/internal/get/get.go#L139-L157.
+# Comment suggesting this issue is fixed in SSH since v7.3 (2016!): https://github.com/golang/go/issues/13453#issuecomment-255348467.
+export GIT_SSH=ssh
 
 # pyenv
 if command -v pyenv >/dev/null 2>&1; then
