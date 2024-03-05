@@ -30,9 +30,10 @@ fi
 
 ## Run targets
 while IFS= read -r target; do
-    skip_var="GITHOOKS_SKIP_$target"
+    safe_target="$(printf "%s" "$target" | tr -- '-/' '__')"
+    skip_var="GITHOOKS_SKIP_$safe_target"
     if [ -z "${!skip_var+x}" ] && ! (cd "$stage" && make "$target"); then
-        echo "pre-commit ERROR Compilation error: fix before committing or set GITHOOKS_SKIP_$target to skip"
+        echo "pre-commit ERROR Compilation error: fix before committing or set GITHOOKS_SKIP_$safe_target to skip"
         exit 1
     fi
 done < "$make_targets"
