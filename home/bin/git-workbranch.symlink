@@ -102,8 +102,8 @@ case "$cmd" in
             fail "$(usage)"
         fi
         for branch_name in "$@"; do
-            branch_name="$(expand_branch_name "$1")"
-            branch_dir="$(make_branch_dir "$branch_name")"
+            full_branch_name="$(expand_branch_name "$branch_name")"
+            branch_dir="$(make_branch_dir "$full_branch_name")"
             if [ "$branch_dir" == "$worktree_dir" ]; then
                 fail "Error: Cannot remove current worktree"
             fi
@@ -111,9 +111,9 @@ case "$cmd" in
                 git worktree remove -f "$branch_dir"
                 echo "Worktree removed: $branch_dir"
             fi
-            if [ -n "$(git branch --list "$branch_name")" ]; then
-                git branch -D "$branch_name"
-                echo "Branch removed: $branch_name"
+            if [ -n "$(git branch --list "$full_branch_name")" ]; then
+                git branch -D "$full_branch_name"
+                echo "Branch removed: $full_branch_name"
             fi
         done
         ;;
