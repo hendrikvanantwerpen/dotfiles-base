@@ -95,7 +95,7 @@ case "$cmd" in
         echo "Creating worktree: $branch_dir"
         git worktree add "$branch_dir" "$branch_name"
         echo "Updating submodules"
-        git -C "$branch_dir" submodule update --init --recursive
+        git -C "$branch_dir" submodule update --init --recursive --depth 1
         ;;
     "remove")
         if [ $# -lt 1 ]; then

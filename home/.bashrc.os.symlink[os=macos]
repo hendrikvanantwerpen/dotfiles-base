@@ -131,6 +131,11 @@ else
   echo "Warning: Missing SDKMAN in $SDKMAN_DIR"
 fi
 
+# Go
+# Homebrew Go with XCode 15 is very noisy about duplicate libraries. Setting this flag
+# silences those warnings.
+export CGO_LDFLAGS="-Wl,-no_warn_duplicate_libraries"
+
 export LC_ALL="en_US.UTF-8"
 
 alias bsdbash="env -i /bin/bash --noprofile --norc"

@@ -11,8 +11,8 @@ fi
 
 ## Check git markers
 # doesn't run outside a Git tree, so not run on $stage
-if ! git diff-index --check HEAD; then
-    echo "pre-commit ERROR Whitespace or conflict marker error: fix"
+if ! git diff-index --check HEAD && [ -z "${GITHOOKS_ALLOW_DIRTY+x}" ]; then
+    echo "pre-commit ERROR Whitespace or conflict marker error: set GITHOOKS_ALLOW_DIRTY to allow"
     exit 1
 fi
 
@@ -22,17 +22,18 @@ stage="$(mktemp -d)"
 git checkout-index --prefix="$stage/" -a
 
 ## Check Rust formatting
-if [ -z "${GITHOOKS_ALLOW_UNFORMATTED+x}" ] && ! (cd "$stage" && cargo fmt -- --check); then
+
+if [ -z "${GITHOOKS_SKIP_ALL+x}" ] && [ -z "${GITHOOKS_ALLOW_UNFORMATTED+x}" ] && ! (cd "$stage" && cargo fmt -- --check); then
     echo "pre-commit ERROR Formatting error: run 'cargo fmt' before committing or set GITHOOKS_ALLOW_UNFORMATTED to allow"
     exit 1
 fi
 
-if [ -z "${GITHOOKS_SKIP_CHECK+x}" ] && ! (cd "$stage" && cargo check --all); then
+if [ -z "${GITHOOKS_SKIP_ALL+x}" ] && [ -z "${GITHOOKS_SKIP_CHECK+x}" ] && ! (cd "$stage" && cargo check --all); then
     echo "pre-commit ERROR Compilation error: fix before committing or set GITHOOKS_SKIP_CHECK to skip"
     exit 1
 fi
 
-if [ -z "${GITHOOKS_SKIP_TEST+x}" ] && ! (cd "$stage" && cargo test --all); then
+if [ -z "${GITHOOKS_SKIP_ALL+x}" ] && [ -z "${GITHOOKS_SKIP_TEST+x}" ] && ! (cd "$stage" && cargo test --all); then
     echo "pre-commit ERROR Test error: fix before committing or set GITHOOKS_SKIP_TEST to skip"
     exit 1
 fi
