@@ -28,6 +28,9 @@ df_macos_set_default com.apple.finder "ShowRemovableMediaOnDesktop"       -bool 
 df_macos_set_default com.apple.finder "_FXSortFoldersFirst"               -bool "true"
 df_macos_set_default com.apple.finder "_FXSortFoldersFirstOnDesktop"      -bool "true"
 
+## Touchpad
+df_macos_set_default NSGlobalDomain "com.apple.swipescrolldirection" -bool "false"
+
 ## Menubar
 df_macos_set_default com.apple.menuextra.clock "DateFormat" -string "\"EEE d MMM HH:mm:ss\""
 df_macos_set_default com.apple.menuextra.clock "FlashDateSeparators" -bool "false"
