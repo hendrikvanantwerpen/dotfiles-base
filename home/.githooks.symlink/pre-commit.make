@@ -11,8 +11,8 @@ fi
 
 ## Check git markers
 # doesn't run outside a Git tree, so not run on $stage
-if ! git diff-index --check HEAD; then
-    echo "pre-commit ERROR Whitespace or conflict marker error: fix"
+if ! git diff-index --check HEAD && [ -z "${GITHOOKS_ALLOW_DIRTY+x}" ]; then
+    echo "pre-commit ERROR Whitespace or conflict marker error: set GITHOOKS_ALLOW_DIRTY to allow"
     exit 1
 fi
 
@@ -29,14 +29,16 @@ if ! [ -f "$make_targets" ]; then
 fi
 
 ## Run targets
-while IFS= read -r target; do
-    safe_target="$(printf "%s" "$target" | tr -- '-/' '__')"
-    skip_var="GITHOOKS_SKIP_$safe_target"
-    if [ -z "${!skip_var+x}" ] && ! (cd "$stage" && make "$target"); then
-        echo "pre-commit ERROR Compilation error: fix before committing or set GITHOOKS_SKIP_$safe_target to skip"
-        exit 1
-    fi
-done < "$make_targets"
+if [ -z "${GITHOOKS_SKIP_ALL+x}" ]; then
+    while IFS= read -r target; do
+        safe_target="$(printf "%s" "$target" | tr -- '-/' '__')"
+        skip_var="GITHOOKS_SKIP_$safe_target"
+        if [ -z "${!skip_var+x}" ] && ! (cd "$stage" && make "$target"); then
+            echo "pre-commit ERROR Compilation error: fix before committing or set $kip_var to skip"
+            exit 1
+        fi
+    done < "$make_targets"
+fi
 
 ## Close curtain
 rm -rf "$stage"
