@@ -124,12 +124,14 @@ export NODE_PATH="/usr/local/lib/node_modules:$NODE_PATH"
 source_if_exists "$HOME/.nix-profile/etc/profile.d/nix.sh"
 
 # SDKMAN
-export SDKMAN_DIR="/usr/local/sdkman"
-if [ -d "$SDKMAN_DIR" ]; then
-  source_if_exists "$SDKMAN_DIR/bin/sdkman-init.sh"
-else
-  echo "Warning: Missing SDKMAN in $SDKMAN_DIR"
-fi
+for sdkman_dir in "$HOME/.sdkman" "/usr/local/sdkman"; do
+    sdkman_init="$sdkman_dir/bin/sdkman-init.sh"
+    if [ -e "$sdkman_init" ]; then
+        export SDKMAN_DIR="$sdkman_dir"
+        . "$sdkman_init"
+        break
+    fi
+done
 
 export LC_ALL="en_US.UTF-8"
 
