@@ -267,6 +267,8 @@ The script should do this: \(ai.prompt)</string>
 	<true/>
 	<key>LeftCommand</key>
 	<integer>1</integer>
+	<key>NeverBlockSystemShutdown</key>
+	<true/>
 	<key>NeverWarnAboutPossibleOverrides</key>
 	<true/>
 	<key>NeverWarnAboutPossibleOverrides_selection</key>
@@ -2752,6 +2754,8 @@ The script should do this: \(ai.prompt)</string>
 			<string>/Users/hendrikvanantwerpen</string>
 		</dict>
 	</array>
+	<key>OnlyWhenMoreTabs</key>
+	<false/>
 	<key>PointerActions</key>
 	<dict>
 		<key>Button,1,1,,</key>
@@ -2786,7 +2790,7 @@ The script should do this: \(ai.prompt)</string>
 		</dict>
 	</dict>
 	<key>PromptOnQuit</key>
-	<true/>
+	<false/>
 	<key>SoundForEsc</key>
 	<false/>
 	<key>TabStyleWithAutomaticOption</key>
