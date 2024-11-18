@@ -14,7 +14,7 @@ fail() {
 usage() {
     echo "Usage: git workbranch list"
     echo "       git workbranch add BRANCH_NAME COMMIT-ISH?"
-    echo "       git workbranch remove BRANCH_NAME..."
+    echo "       git workbranch remove [-f] BRANCH_NAME..."
     echo "       git workbranch help"
 }
 
@@ -98,6 +98,20 @@ case "$cmd" in
         git -C "$branch_dir" submodule update --init --recursive --depth 1
         ;;
     "remove")
+        branch_flag="-d"
+        worktree_flag=""
+        while [ $# -ne 0 ]; do
+            case "$1" in
+                "-f")
+                    branch_flag="-D"
+                    worktree_flag="-f"
+                    shift 1
+                    ;;
+                *)
+                    break
+                    ;;
+            esac
+        done
         if [ $# -lt 1 ]; then
             fail "$(usage)"
         fi
@@ -108,12 +122,20 @@ case "$cmd" in
                 fail "Error: Cannot remove current worktree"
             fi
             if [ -e "$branch_dir" ]; then
-                git worktree remove -f "$branch_dir"
-                echo "Worktree removed: $branch_dir"
+                if git worktree remove $worktree_flag "$branch_dir"; then
+                    echo "Worktree removed: $branch_dir"
+                else
+                    echo "Worktree NOT removed: $branch_dir"
+                    continue
+                fi
             fi
             if [ -n "$(git branch --list "$full_branch_name")" ]; then
-                git branch -D "$full_branch_name"
-                echo "Branch removed: $full_branch_name"
+                if git branch $branch_flag "$full_branch_name"; then
+                    echo "Branch removed: $full_branch_name"
+                else
+                    echo "Branch NOT removed: $full_branch_name"
+                    continue
+                fi
             fi
         done
         ;;
