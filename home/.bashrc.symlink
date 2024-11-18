@@ -32,49 +32,14 @@ fi
 # editor
 if [ "${CODESPACES-false}" == "true" ]; then
     true # noop
+elif [ "${TERM_PROGRAM-x}" == "vscode" ]; then
+    export EDITOR="code --wait"
+    export VISUAL="$EDITOR"
+    export GIT_EDITOR="$EDITOR"
 else
     export EDITOR="vim"
     export VISUAL="$EDITOR"
     export GIT_EDITOR="$EDITOR"
-fi
-
-# gpg-agent
-export GPG_TTY=$(tty)
-
-# Prevent Java tools from stealing focus
-export JAVA_TOOL_OPTIONS="-Djava.awt.headless=true"
-
-# Give Maven more memory
-export MAVEN_OPTS="-Xss64m -Xms1G -Xmx3G"
-
-# OPAM configuration
-source_if_exists "$HOME/.opam/opam-init/init.sh" >/dev/null 2>&1 || true
-
-# rustup configuration
-source_if_exists "$HOME/.cargo/env" >/dev/null 2>&1 || true
-
-# NVM
-export NVM_DIR="$HOME/.nvm"
-source_if_exists "$NVMPATH/nvm.sh"
-
-# direnv
-if command -v direnv >/dev/null 2>&1; then
-  eval "$(direnv hook bash)"
-fi
-
-# Golang
-export GOPATH="$HOME/.go"
-export PATH="$GOPATH/bin:$PATH"
-# We set this explicitly to tell Go not to mess with our SSH connections and use ControlMaster
-# From the Go source: https://github.com/golang/go/blob/0f3becf62f3935846490e60e5005e1e4a55bec67/src/cmd/go/internal/get/get.go#L139-L157.
-# Comment suggesting this issue is fixed in SSH since v7.3 (2016!): https://github.com/golang/go/issues/13453#issuecomment-255348467.
-export GIT_SSH=ssh
-
-# pyenv
-if command -v pyenv >/dev/null 2>&1; then
-    export PYENV_ROOT="$HOME/.pyenv"
-    export PATH="$PYENV_ROOT/bin:$PATH"
-    eval "$(pyenv init -)"
 fi
 
 # Source secrets
@@ -161,3 +126,80 @@ source_if_exists "$HOME/.bashrc.host"
 
 # Source user specific definitions
 source_if_exists "$HOME/.bashrc.user"
+
+# gpg-agent
+export GPG_TTY=$(tty)
+
+# Prevent Java tools from stealing focus
+export JAVA_TOOL_OPTIONS="-Djava.awt.headless=true"
+
+# Give Maven more memory
+export MAVEN_OPTS="-Xss64m -Xms1G -Xmx3G"
+
+# OPAM configuration
+source_if_exists "$HOME/.opam/opam-init/init.sh" >/dev/null 2>&1 || true
+
+# rustup configuration
+source_if_exists "$HOME/.cargo/env" >/dev/null 2>&1 || true
+
+# NVM
+export NVM_DIR="$HOME/.nvm"
+source_if_exists "$NVMPATH/nvm.sh"
+
+# direnv
+if command -v direnv >/dev/null 2>&1; then
+  eval "$(direnv hook bash)"
+fi
+
+# Golang
+export GOPATH="$HOME/.go"
+export PATH="$GOPATH/bin:$PATH"
+# We set this explicitly to tell Go not to mess with our SSH connections and use ControlMaster
+# From the Go source: https://github.com/golang/go/blob/0f3becf62f3935846490e60e5005e1e4a55bec67/src/cmd/go/internal/get/get.go#L139-L157.
+# Comment suggesting this issue is fixed in SSH since v7.3 (2016!): https://github.com/golang/go/issues/13453#issuecomment-255348467.
+export GIT_SSH=ssh
+
+# pyenv
+if command -v pyenv >/dev/null 2>&1; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
+fi
+
+export GPG_TTY=$(tty)
+
+# Prevent Java tools from stealing focus
+export JAVA_TOOL_OPTIONS="-Djava.awt.headless=true"
+
+# Give Maven more memory
+export MAVEN_OPTS="-Xss64m -Xms1G -Xmx3G"
+
+# OPAM configuration
+source_if_exists "$HOME/.opam/opam-init/init.sh" >/dev/null 2>&1 || true
+
+# rustup configuration
+source_if_exists "$HOME/.cargo/env" >/dev/null 2>&1 || true
+
+# NVM
+export NVM_DIR="$HOME/.nvm"
+source_if_exists "$NVMPATH/nvm.sh"
+
+# direnv
+if command -v direnv >/dev/null 2>&1; then
+  eval "$(direnv hook bash)"
+fi
+
+# Golang
+export GOPATH="$HOME/.go"
+export PATH="$GOPATH/bin:$PATH"
+# We set this explicitly to tell Go not to mess with our SSH connections and use ControlMaster
+# From the Go source: https://github.com/golang/go/blob/0f3becf62f3935846490e60e5005e1e4a55bec67/src/cmd/go/internal/get/get.go#L139-L157.
+# Comment suggesting this issue is fixed in SSH since v7.3 (2016!): https://github.com/golang/go/issues/13453#issuecomment-255348467.
+export GIT_SSH=ssh
+
+# pyenv
+if command -v pyenv >/dev/null 2>&1; then
+    export PYENV_ROOT="$HOME/.pyenv"
+    export PATH="$PYENV_ROOT/bin:$PATH"
+    eval "$(pyenv init -)"
+fi
