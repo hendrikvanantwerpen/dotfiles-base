@@ -27,6 +27,8 @@ df_macos_set_default com.apple.finder "ShowPathbar"                       -bool 
 df_macos_set_default com.apple.finder "ShowRemovableMediaOnDesktop"       -bool "false"
 df_macos_set_default com.apple.finder "_FXSortFoldersFirst"               -bool "true"
 df_macos_set_default com.apple.finder "_FXSortFoldersFirstOnDesktop"      -bool "true"
+df_macos_set_default com.apple.desktopservices "DSDontWriteNetworkStores" -bool "true"
+df_macos_set_default com.apple.desktopservices "DSDontWriteUSBStores"     -bool "true"
 
 ## Trackpad
 ##### Disable "natural" scrolling

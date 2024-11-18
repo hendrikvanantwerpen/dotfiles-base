@@ -13,6 +13,8 @@
   - Set hostname: System Settings > General > About; Name
   - Disable everything in System Settings > Keyboard; Text Input
   - Disable sounds in System Settings > Sounds
+- Allow TouchID for sudo
+  - Edit/create `/etc/pam.d/sudo_local` and add `auth sufficient pam_tid.so`
 - Install XCode developer tools
   - `xcode-select --install`
 - Setup dotfiles
