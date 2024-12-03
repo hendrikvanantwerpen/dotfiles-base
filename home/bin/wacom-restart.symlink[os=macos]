@@ -1,0 +1,8 @@
+#!/usr/bin/env osascript
+
+on run
+    set app_name to "WacomTabletDriver"
+    do shell script "killall " & app_name
+    delay 1
+    tell application app_name to activate
+end run
