@@ -96,6 +96,7 @@ case "$cmd" in
         git worktree add "$branch_dir" "$branch_name"
         echo "Updating submodules"
         git -C "$branch_dir" submodule update --init --recursive --depth 1
+        echo "Worktree created: $branch_dir"
         ;;
     "remove")
         branch_flag="-d"
