@@ -141,4 +141,5 @@ export CGO_LDFLAGS="-Wl,-no_warn_duplicate_libraries"
 export LC_ALL="en_US.UTF-8"
 
 alias bsdbash="env -i /bin/bash --noprofile --norc"
-alias doppio="caffeinate -disu"
+alias adrenaline="caffeinate -disu"
+alias insomnia="caffeinate -ism"
