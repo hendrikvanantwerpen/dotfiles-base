@@ -105,14 +105,23 @@ alias ls='ls --color=tty'
 
 alias timestamp='date +%Y%m%dT%H%M%S'
 
-alias gc+='git commit --amend'
 alias gc='git commit'
+alias gca='git commit --amend'
+alias gd='git diff'
 alias gf='git fetch'
 alias gfo='git fetch origin'
 alias gg='git gone'
-alias gp='git pull'
+alias gm="git merge"
+alias gma="git merge --abort"
+alias gmc="git merge --continue"
+alias gmom='git merge origin/main'
+alias gpl='git pull'
+alias gps='git push'
+alias grb='git rebase'
+alias grba='git rebase --abort'
 alias grbc='git rebase --continue'
 alias grbi='git rebase -i'
+alias gst='git status'
 alias gwb='git workbranch'
 alias gwba='git workbranch add'
 alias gwbl='git workbranch list'
