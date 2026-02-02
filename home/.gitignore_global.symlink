@@ -8,5 +8,6 @@
 .\#*
 .envrc
 .statix
+.claude
 \#*\#
 auto/
