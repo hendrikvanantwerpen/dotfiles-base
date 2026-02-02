@@ -7,6 +7,27 @@ fi
 
 case "$df_os" in
 "macos")
+    the_bash="$($df_macos_brew --prefix bash)/bin/bash"
+    shells=/etc/shells
+    if $df_system; then
+        if ! grep "$the_bash" "$shells" >/dev/null 2>&1; then
+            echo "Adding $the_bash to $shells"
+            $df_run sudo sh -c "printf \"%s\\n\" \"$the_bash\" >>\"$shells\""
+        fi
+    fi
+    if [ "$SHELL" != "$the_bash" ]; then
+        if ! grep "$the_bash" "$shells" >/dev/null 2>&1; then
+            df_error "Cannot set login shell: $the_bash missing from $shells"
+        else
+            echo "Set login shell: $the_bash"
+            $df_run chsh -s "$the_bash"
+        fi
+    fi
+    ;;
+esac
+
+case "$df_os" in
+"macos")
     local_ssh_agent="com.openssh.ssh-agent-local"
     if df_macos_service_status "$local_ssh_agent"; then
         echo "Local SSH agent already enabled."

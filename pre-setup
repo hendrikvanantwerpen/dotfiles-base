@@ -4,18 +4,3 @@ if [ -z ${DF_MOD_DIR+x} ] || [ ! -d "$DF_MOD_DIR" ]; then
     echo "Required environment variable DF_MOD_DIR is empty. Sourced from outside a dotfiles script?" 1>&2
     exit 1
 fi
-
-case "$df_os" in
-"macos")
-    shells=/etc/shells
-    the_bash="$($df_macos_brew --prefix bash)/bin/bash"
-    if ! grep "$the_bash" "$shells" >/dev/null 2>&1; then
-        echo "Adding $the_bash to $shells"
-        $df_run sudo sh -c "printf \"%s\\n\" \"$the_bash\" >>\"$shells\""
-    fi
-    if [ "$SHELL" != "$the_bash" ]; then
-        echo "Set $the_bash as login shell"
-        $df_run chsh -s "$the_bash"
-    fi
-    ;;
-esac
