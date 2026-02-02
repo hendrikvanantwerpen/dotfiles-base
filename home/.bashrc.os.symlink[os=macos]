@@ -57,7 +57,7 @@ elif [ ! -e "$brew_env" ] || [ "$(brew --cellar)" -nt "$brew_env" ]; then
   done
 
   # bin packages
-  for pkg in curl gnu-getopt ruby rustup scala sphinx-doc texinfo; do
+  for pkg in curl gnu-getopt node ruby rustup scala sphinx-doc texinfo; do
     if pkg="$(brew_prefix "$pkg")"; then
       add_to_brew_env "PATH=\"$pkg/bin:\$PATH\""
     fi
@@ -138,7 +138,8 @@ done
 # silences those warnings.
 export CGO_LDFLAGS="-Wl,-no_warn_duplicate_libraries"
 
-export LC_ALL="en_US.UTF-8"
+# Docker
+export PATH="$HOME/.docker/bin:$PATH"
 
 alias bsdbash="env -i /bin/bash --noprofile --norc"
 alias adrenaline="caffeinate -disu"
