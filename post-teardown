@@ -4,14 +4,3 @@ if [ -z ${DF_MOD_DIR+x} ] || [ ! -d "$DF_MOD_DIR" ]; then
     echo "Required environment variable DF_MOD_DIR is empty. Sourced from outside a dotfiles script?" 1>&2
     exit 1
 fi
-
-case "$df_os" in
-"macos")
-    local_ssh_agent="com.openssh.ssh-agent-local"
-    if df_macos_service_status "$local_ssh_agent"; then
-        echo "Local SSH agent kept enabled, to prevent SSH connectivity issues."
-        echo "Disable manually using:"
-        echo "    dotfiles services disable $local_ssh_agent"
-    fi
-    ;;
-esac

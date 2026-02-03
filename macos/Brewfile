@@ -1,5 +1,4 @@
 tap "microsoft/git"
-tap "theseal/ssh-askpass"
 brew "ack"
 brew "act"
 brew "autoconf"

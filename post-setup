@@ -25,18 +25,3 @@ case "$df_os" in
     fi
     ;;
 esac
-
-case "$df_os" in
-"macos")
-    local_ssh_agent="com.openssh.ssh-agent-local"
-    if df_macos_service_status "$local_ssh_agent"; then
-        echo "Local SSH agent already enabled."
-        echo "Restart manually using:"
-        echo "    dotfiles services restart $local_ssh_agent"
-    else
-        $df_run df_macos_service_enable "$local_ssh_agent"
-        echo "Local SSH agent enabled. Update current shell environment using:"
-        echo "    source ~/.ssh-agent-local"
-    fi
-    ;;
-esac
