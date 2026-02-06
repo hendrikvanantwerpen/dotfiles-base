@@ -3,7 +3,9 @@
 set -eu
 
 log() {
-    echo "$@" 1>&2
+    for line in "$@"; do
+        echo "$line" 1>&2
+    done
 }
 
 fail() {
@@ -11,34 +13,64 @@ fail() {
     exit 1
 }
 
-usage() {
-    echo "Usage: git workbranch list"
-    echo "       git workbranch add BRANCH_NAME COMMIT-ISH?"
-    echo "       git workbranch remove [-f] BRANCH_NAME..."
-    echo "       git workbranch help"
+usage_list() {
+    echo "git workbranch list"
 }
 
-if [ $# -lt 1 ]; then
-    fail "$(usage)"
+usage_add() {
+    echo "git workbranch add BRANCH_NAME [COMMIT-ISH]"
+}
+
+usage_remove() {
+    echo "git workbranch remove [-f] BRANCH_NAME..."
+}
+
+usage() {
+    echo "Usage: $(usage_list)"
+    echo "       $(usage_add)"
+    echo "       $(usage_remove)"
+}
+
+while [ $# -gt 0 ]; do
+    case "$1" in
+        -h|--help)
+            log "$(usage)"
+            exit 0
+            ;;
+        -*)
+            fail "Error: invalid flag" \
+                 "$(usage)"
+            ;;
+        *)
+            cmd="$1"
+            shift 1
+            break
+            ;;
+    esac
+    shift 1
+done
+
+if [ -z "${cmd+x}" ]; then
+    fail "Error: missing command" \
+         "$(usage)"
 fi
-cmd="$1"
-shift 1
 
 worktree_dir="$(git rev-parse --show-toplevel)"
 worktree_parent="$(dirname "$worktree_dir")"
 worktree_name="$(basename "$worktree_dir")"
 worktree_base="$(printf "%s" "$worktree_name" | sed -e 's/\..*$//')"
 
-github_login=
 if try_github_login="$(gh api user -q '.login')"; then
     github_login="$try_github_login"
-else
-    log "Warning: cannot determine GitHub login. Try running 'gh auth login'."
 fi
 
 expand_branch_name() {
     branch_name="$1"
-    if [ -n "$github_login" ]; then
+    if [[ "$branch_name" == *@me* ]]; then
+        if [ -z "${github_login+x}" ]; then
+            fail "Error: Cannot determine GitHub login to expand @me" \
+                 "       in $branch_name. Try running 'gh auth login'."
+        fi
         branch_name="${branch_name/#@me/$github_login}"
     fi
     printf '%s' "$branch_name"
@@ -46,8 +78,8 @@ expand_branch_name() {
 
 make_branch_dir() {
     branch_name="$1"
-    if [ -n "$github_login" ]; then
-        branch_name="${branch_name#$github_login/}"
+    if [ -n "${github_login+x}" ]; then
+        branch_name="${branch_name#"$github_login"/}"
     fi
     branch_suffix="$(printf '%s' "$branch_name" | tr '/' '_')"
     branch_dir="$worktree_parent/$worktree_base.$branch_suffix"
@@ -55,23 +87,50 @@ make_branch_dir() {
 }
 
 case "$cmd" in
-    "list")
+    list)
+        while [ $# -gt 0 ]; do
+            case "$1" in
+                -h|--help)
+                    log "Usage: $(usage_list)"
+                    exit 0
+                    ;;
+                *)
+                    fail "Error: Unexpected argument $1" \
+                         "Usage: $(usage_list)"
+                    ;;
+            esac
+            shift 1
+        done
         git worktree list
         ;;
-    "add")
-        if [ $# -lt 1 ]; then
-            fail "$(usage)"
+    add)
+        branch_commitish=
+        while [ $# -gt 0 ]; do
+            case "$1" in
+                -h|--help)
+                    log "Usage: $(usage_add)"
+                    exit 0
+                    ;;
+                *)
+                    if [ -z "${branch_name+x}" ]; then
+                        branch_name="$(expand_branch_name "$1")"
+                    elif [ -z "${branch_commitish:+x}" ]; then
+                        branch_commitish="$1"
+                    else
+                        fail "Error: Unexpected argument $1" \
+                             "Usage: $(usage_add)"
+                    fi
+                    ;;
+            esac
+            shift 1
+        done
+        if [ -z "${branch_name+x}" ]; then
+            fail "Error: Missing required branch name(s)" \
+                 "Usage: $(usage_add)"
         fi
-        branch_name="$(expand_branch_name "$1")"
-        shift 1
         branch_dir="$(make_branch_dir "$branch_name")"
         if [ -e "$branch_dir" ]; then
             fail "Error: Branch directory $branch_dir already exists"
-        fi
-        branch_commitish=
-        if [ $# -gt 0 ]; then
-            branch_commitish="$1"
-            shift 1
         fi
         if [ -n "$(git branch --list "$branch_name")" ]; then
             if [ -n "$branch_commitish" ]; then
@@ -96,27 +155,39 @@ case "$cmd" in
         git worktree add "$branch_dir" "$branch_name"
         echo "Updating submodules"
         git -C "$branch_dir" submodule update --init --recursive --depth 1
+        echo "Syncing modified files"
+        rsync -au --exclude=.git --delete . "$branch_dir/."
         echo "Worktree created: $branch_dir"
         ;;
-    "remove")
-        branch_flag="-d"
-        worktree_flag=""
-        while [ $# -ne 0 ]; do
+    remove)
+        branch_flag=-d
+        worktree_flag=
+        branch_names=()
+        while [ $# -gt 0 ]; do
             case "$1" in
-                "-f")
+                -h|--help)
+                    log "Usage: $(usage_remove)"
+                    exit 0
+                    ;;
+                -f|--force)
                     branch_flag="-D"
                     worktree_flag="-f"
-                    shift 1
+                    ;;
+                -*)
+                    fail "Error: Unexpected flag $1" \
+                         "$(usage_remove)"
                     ;;
                 *)
-                    break
+                    branch_names+=("$1")
                     ;;
             esac
+            shift 1
         done
-        if [ $# -lt 1 ]; then
-            fail "$(usage)"
+        if [ ${#branch_names[@]} -lt 1 ]; then
+            fail "Error: Missing branch names" \
+                 "Usage: $(usage_remove)"
         fi
-        for branch_name in "$@"; do
+        for branch_name in "${branch_names[@]}"; do
             full_branch_name="$(expand_branch_name "$branch_name")"
             branch_dir="$(make_branch_dir "$full_branch_name")"
             if [ "$branch_dir" == "$worktree_dir" ]; then
@@ -140,11 +211,11 @@ case "$cmd" in
             fi
         done
         ;;
-    "help")
+    help)
         usage
         exit 0
         ;;
     *)
-        log "Error: Unexpected command '$cmd'"
-        fail "$(usage)"
+        fail "Error: Unexpected command '$cmd'" \
+             "$(usage)"
 esac
