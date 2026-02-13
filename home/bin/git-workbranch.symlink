@@ -155,8 +155,19 @@ case "$cmd" in
         git worktree add "$branch_dir" "$branch_name"
         echo "Updating submodules"
         git -C "$branch_dir" submodule update --init --recursive --depth 1
-        echo "Syncing modified files"
-        rsync -au --exclude=.git --delete . "$branch_dir/."
+        echo "Syncing staged changes"
+        git diff --cached | git -C "$branch_dir" apply --allow-empty --cached
+        echo "Syncing unstaged changes"
+        git diff | git -C "$branch_dir" apply --allow-empty
+        echo "Syncing untracked files"
+        git ls-files --others --exclude-standard | while IFS= read -r f; do
+            if [ -L "$f" ]; then
+                log "Warning: skipping symlink: $f"
+            else
+                mkdir -p "$(dirname "$branch_dir/$f")"
+                cp -p "$f" "$branch_dir/$f"
+            fi
+        done
         echo "Worktree created: $branch_dir"
         ;;
     remove)
