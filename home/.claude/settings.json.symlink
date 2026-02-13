@@ -1,10 +1,11 @@
 {
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
   "sandbox": {
     "enabled": true,
     "allowUnsandboxedCommands": false
   },
-  "permissions": {
-    "defaultMode": "bypassPermissions"
-  },
-  "promptSuggestionEnabled": false
+  "promptSuggestionEnabled": false,
+  "skipDangerousModePermissionPrompt": true
 }
