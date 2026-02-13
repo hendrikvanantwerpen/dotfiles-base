@@ -1,0 +1,10 @@
+{
+  "sandbox": {
+    "enabled": true,
+    "allowUnsandboxedCommands": false
+  },
+  "permissions": {
+    "defaultMode": "bypassPermissions"
+  },
+  "promptSuggestionEnabled": false
+}
