@@ -55,7 +55,7 @@ elif [ ! -e "$brew_env" ] || [ "$(brew --cellar)" -nt "$brew_env" ]; then
   done
 
   # bin packages
-  for pkg in curl gnu-getopt node ruby rustup scala sphinx-doc texinfo; do
+  for pkg in curl gnu-getopt node postgres@17 ruby rustup scala sphinx-doc texinfo; do
     if pkg="$(brew_prefix "$pkg")"; then
       add_to_brew_env "PATH=\"$pkg/bin:\$PATH\""
     fi

@@ -1,10 +1,12 @@
 {
   "permissions": {
-    "defaultMode": "bypassPermissions"
+    "defaultMode": "bypassPermissions",
+    "additionalDirectories": ["/Volumes/HVACACHES", "/Users/hvantwerpen/.cache"]
   },
   "sandbox": {
     "enabled": true,
-    "allowUnsandboxedCommands": false
+    "allowUnsandboxedCommands": false,
+    "excludedCommands": ["bazel", "git"]
   },
   "promptSuggestionEnabled": false,
   "skipDangerousModePermissionPrompt": true
