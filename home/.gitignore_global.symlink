@@ -1,14 +1,27 @@
+# Temp and backup files
 .\#*
-.claude/
-.DS_Store
-.envrc
-.nuanced/
-.statix
-*.log
-*.orig
-*.pyc
 *.swo
 *.swp
+*.orig
 *~
 \#*\#
+
+# Coding agent instructions
+.claude/
+AGENTS.md
+CLAUDE.md
+
+# macOS
+.DS_Store
+
+# direnv
+.envrc
+
+# Python
+*.pyc
+
+# Log files
+*.log
+
+# Emacs
 auto/

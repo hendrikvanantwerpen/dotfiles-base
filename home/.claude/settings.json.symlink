@@ -1,12 +1,30 @@
 {
   "permissions": {
     "defaultMode": "bypassPermissions",
-    "additionalDirectories": ["/Volumes/HVACACHES", "/Users/hvantwerpen/.cache"]
+    "additionalDirectories": [
+      "/Volumes/HVACACHES",
+      "/Users/hvantwerpen/.cache",
+      "/tmp"
+    ]
   },
   "sandbox": {
     "enabled": true,
+    "autoAllowBashIfSandboxed": true,
     "allowUnsandboxedCommands": false,
-    "excludedCommands": ["bazel", "git"]
+    "excludedCommands": [
+      "bazel:*",
+      "git bisect:*",
+      "git diff:*",
+      "git grep:*",
+      "git log:*",
+      "git show:*",
+      "git status:*",
+      "go:*"
+    ],
+    "network": {
+      "allowLocalBinding": true,
+      "allowedDomains": ["go.dev"]
+    }
   },
   "promptSuggestionEnabled": false,
   "skipDangerousModePermissionPrompt": true
