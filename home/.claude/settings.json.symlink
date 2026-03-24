@@ -2,9 +2,10 @@
   "permissions": {
     "defaultMode": "bypassPermissions",
     "additionalDirectories": [
-      "/Volumes/HVACACHES",
+      "/private/tmp",
+      "/tmp",
       "/Users/hvantwerpen/.cache",
-      "/tmp"
+      "/Volumes/HVACACHES"
     ]
   },
   "sandbox": {
@@ -13,17 +14,19 @@
     "allowUnsandboxedCommands": false,
     "excludedCommands": [
       "bazel:*",
+      "cargo:*",
       "git bisect:*",
       "git diff:*",
       "git grep:*",
       "git log:*",
       "git show:*",
       "git status:*",
-      "go:*"
+      "go:*",
+      "tree-sitter:*"
     ],
     "network": {
       "allowLocalBinding": true,
-      "allowedDomains": ["go.dev"]
+      "allowedDomains": ["crates.io", "go.dev"]
     }
   },
   "promptSuggestionEnabled": false,

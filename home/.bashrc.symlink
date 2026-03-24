@@ -33,7 +33,11 @@ fi
 if [ "${CODESPACES-false}" == "true" ]; then
     true # noop
 elif [ "${TERM_PROGRAM-x}" == "vscode" ]; then
-    export EDITOR="code --wait"
+    if [ -n "${CURSOR_TRACE_ID-x}" ]; then
+        export EDITOR="cursor --wait"
+    else
+        export EDITOR="code --wait"
+    fi
     export VISUAL="$EDITOR"
     export GIT_EDITOR="$EDITOR"
 else
