@@ -1,0 +1,231 @@
+#!/usr/bin/env python3
+"""List GitHub PRs and issues that need your attention."""
+
+import json
+import subprocess
+import sys
+from datetime import datetime
+
+
+def gh(*args):
+    """Run a gh command and return parsed JSON output."""
+    cmd = ["gh"] + list(args)
+    r = subprocess.run(cmd, capture_output=True, text=True)
+    if r.returncode != 0:
+        err = r.stderr.strip()
+        print(f"error: gh {' '.join(args[:3])}...: {err}", file=sys.stderr)
+        return None
+    if not r.stdout.strip():
+        return []
+    return json.loads(r.stdout)
+
+
+def get_login():
+    r = subprocess.run(["gh", "api", "user", "--jq", ".login"],
+                       capture_output=True, text=True)
+    if r.returncode != 0:
+        print("error: not authenticated with gh", file=sys.stderr)
+        sys.exit(1)
+    return r.stdout.strip()
+
+
+def get_current_repo():
+    """Get owner/repo from current git repo, or None."""
+    r = subprocess.run(
+        ["gh", "repo", "view", "--json", "nameWithOwner", "--jq", ".nameWithOwner"],
+        capture_output=True, text=True)
+    if r.returncode == 0 and r.stdout.strip():
+        return r.stdout.strip()
+    return None
+
+
+def parse_repo_arg(arg):
+    """Parse a repo argument: URL, owner/name, or None."""
+    if not arg:
+        return None
+    # Strip trailing slashes and .git
+    arg = arg.rstrip("/")
+    if arg.endswith(".git"):
+        arg = arg[:-4]
+    # URL form: https://github.com/owner/name
+    if "github.com/" in arg:
+        parts = arg.split("github.com/", 1)[1]
+        return parts
+    # owner/name form
+    if "/" in arg:
+        return arg
+    return None
+
+
+def fmt_ref(repo, number, title, single_repo):
+    """Format a PR/issue reference."""
+    if single_repo:
+        return f"#{number} {title}"
+    return f"{repo}#{number} {title}"
+
+
+def search_issues(repo, login):
+    """Find open issues assigned to me."""
+    args = ["search", "issues", "--assignee", login, "--state", "open",
+            "--json", "number,title,repository,url", "--limit", "100"]
+    if repo:
+        args += ["--repo", repo]
+    return gh(*args) or []
+
+
+def search_assigned_prs(repo, login):
+    """Find open PRs assigned to me."""
+    args = ["search", "prs", "--assignee", login, "--state", "open",
+            "--json", "number,title,repository,url", "--limit", "100"]
+    if repo:
+        args += ["--repo", repo]
+    return gh(*args) or []
+
+
+def search_review_requested(repo, login):
+    """Find open PRs where my review is requested."""
+    args = ["search", "prs", "--review-requested", login, "--state", "open",
+            "--json", "number,title,repository,url", "--limit", "100"]
+    if repo:
+        args += ["--repo", repo]
+    return gh(*args) or []
+
+
+def search_reviewed_by(repo, login):
+    """Find open PRs I've reviewed."""
+    args = ["search", "prs", "--reviewed-by", login, "--state", "open",
+            "--json", "number,title,repository,url", "--limit", "100"]
+    if repo:
+        args += ["--repo", repo]
+    return gh(*args) or []
+
+
+def get_review_info(repo, number, login):
+    """Get review details for a PR. Returns (has_my_review, changed_since_review)."""
+    all_reviews = gh("api", f"repos/{repo}/pulls/{number}/reviews", "--paginate")
+    if not all_reviews:
+        return False, False
+
+    # Filter to my reviews
+    my_reviews = [r for r in all_reviews
+                  if r.get("user", {}).get("login") == login]
+    if not my_reviews:
+        return False, False
+
+    # Get latest review timestamp
+    latest = max(my_reviews, key=lambda r: r.get("submitted_at", ""))
+
+    # Get current head SHA and commits
+    pr_data = gh("pr", "view", str(number), "-R", repo, "--json", "commits")
+    if not pr_data or not pr_data.get("commits"):
+        return True, False
+
+    # Check if any commit is newer than our last review
+    review_time = datetime.fromisoformat(latest["submitted_at"].replace("Z", "+00:00"))
+    for commit in pr_data["commits"]:
+        commit_date = commit.get("committedDate", "")
+        if commit_date:
+            ct = datetime.fromisoformat(commit_date.replace("Z", "+00:00"))
+            if ct > review_time:
+                return True, True
+
+    return True, False
+
+
+def repo_name(item):
+    """Extract owner/name from a search result."""
+    r = item.get("repository", {})
+    return r.get("nameWithOwner", "") if isinstance(r, dict) else ""
+
+
+def main():
+    # Parse arguments
+    repo = None
+    all_repos = False
+
+    if len(sys.argv) > 1:
+        repo = parse_repo_arg(sys.argv[1])
+        if not repo:
+            print(f"error: could not parse repo: {sys.argv[1]}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        repo = get_current_repo()
+        if not repo:
+            all_repos = True
+
+    single_repo = not all_repos
+
+    login = get_login()
+
+    # Collect all data
+    issues = search_issues(repo, login)
+    assigned_prs = search_assigned_prs(repo, login)
+    review_requested = search_review_requested(repo, login)
+    reviewed_prs = search_reviewed_by(repo, login)
+
+    # Categorize review PRs
+    review_requested_keys = {(repo_name(p), p["number"]) for p in review_requested}
+
+    new_prs = []
+    again_prs = []
+    changed_prs = []
+
+    # Check review-requested PRs: New vs Again
+    for pr in review_requested:
+        rn = repo_name(pr)
+        has_review, _ = get_review_info(rn, pr["number"], login)
+        if has_review:
+            again_prs.append(pr)
+        else:
+            new_prs.append(pr)
+
+    # Check reviewed PRs for Changed status
+    for pr in reviewed_prs:
+        rn = repo_name(pr)
+        key = (rn, pr["number"])
+        if key in review_requested_keys:
+            continue  # Already categorized above
+        _, changed = get_review_info(rn, pr["number"], login)
+        if changed:
+            changed_prs.append(pr)
+
+    # Output
+    def print_section(label, items):
+        if not items:
+            return
+        print(f"{label}:")
+        for item in items:
+            rn = repo_name(item)
+            ref = fmt_ref(rn, item["number"], item["title"], single_repo)
+            print()
+            print(f"  {ref}")
+            print(f"    {item['url']}")
+        print()
+
+    any_output = False
+    if issues:
+        any_output = True
+        print_section("Assigned issues", issues)
+
+    if assigned_prs:
+        any_output = True
+        print_section("Assigned PRs", assigned_prs)
+
+    if new_prs:
+        any_output = True
+        print_section("New review PRs", new_prs)
+
+    if again_prs:
+        any_output = True
+        print_section("Review again PRs", again_prs)
+
+    if changed_prs:
+        any_output = True
+        print_section("Changed reviewed PRs", changed_prs)
+
+    if not any_output:
+        print("No tasks found.")
+
+
+if __name__ == "__main__":
+    main()
